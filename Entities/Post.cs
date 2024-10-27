@@ -15,7 +15,6 @@ namespace FeedBackBoardApi.Entities
 		public int Id { get; set; }
 		public string Title { get; set; }
 		public string Detail { get; set; }
-		public int Count { get; set; }
 		public int CommentId { get; set; }
 		public int CategoryId { get; set; }
 
