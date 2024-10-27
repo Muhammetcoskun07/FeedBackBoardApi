@@ -18,6 +18,13 @@ namespace FeedBackBoardApi.Entities
 		public int Count { get; set; }
 		public int CommentId { get; set; }
 		public int CategoryId { get; set; }
+
 		public Status Status { get; set; }
+
+
+		public Category Category { get; set; }
+		public List<Comment> Comments { get; set; }
+		public List<Vote> Votes { get; set; }
+
 	}
 }

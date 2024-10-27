@@ -8,5 +8,8 @@
 		public string Password { get; set; }
 		public IFormFile? Img { get; set; }
 		public string? ImgPath { get; set; }
+
+		public List<Comment> Comments { get; set; }            
+		public List<Vote> Votes { get; set; }
 	}
 }
