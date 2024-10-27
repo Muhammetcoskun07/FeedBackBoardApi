@@ -5,7 +5,6 @@ namespace FeedBackBoardApi.Data
 {
 	public class AppDbContext : DbContext
 	{
-
 		public DbSet<Post> Posts { get; set; }
 		public DbSet<User> Users { get; set; }
 		public DbSet<Category> Categories { get; set; }
@@ -14,7 +13,6 @@ namespace FeedBackBoardApi.Data
 
 		public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
 		{
-
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,35 +21,35 @@ namespace FeedBackBoardApi.Data
 				.HasOne<User>()
 				.WithMany()
 				.HasForeignKey(c => c.UserId)
-				.OnDelete(DeleteBehavior.Cascade);
+				.OnDelete(DeleteBehavior.NoAction);
 
 			modelBuilder.Entity<Post>()
 				.HasOne<Category>()
 				.WithMany()
 				.HasForeignKey(p => p.CategoryId)
-				.OnDelete(DeleteBehavior.Cascade);
+				.OnDelete(DeleteBehavior.NoAction);
 
 			modelBuilder.Entity<Comment>()
 				.HasOne<Post>()
 				.WithMany()
 				.HasForeignKey(c => c.PostId)
-				.OnDelete(DeleteBehavior.Cascade);
+				.OnDelete(DeleteBehavior.NoAction);
 
 			modelBuilder.Entity<Vote>()
 				.HasOne(v => v.User)
 				.WithMany()
 				.HasForeignKey(v => v.UserId)
-				.OnDelete(DeleteBehavior.Cascade);
+				.OnDelete(DeleteBehavior.NoAction); // Değişiklik
 
 			modelBuilder.Entity<Vote>()
 				.HasOne(v => v.Post)
 				.WithMany()
 				.HasForeignKey(v => v.PostId)
-				.OnDelete(DeleteBehavior.Cascade);
+				.OnDelete(DeleteBehavior.NoAction); // Değişiklik
 
+			modelBuilder.Entity<User>().Ignore(u => u.Img);
 
 			base.OnModelCreating(modelBuilder);
 		}
-
 	}
 }

@@ -1,4 +1,6 @@
-﻿namespace FeedBackBoardApi.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace FeedBackBoardApi.Entities
 {
 	public class User
 	{
@@ -6,6 +8,8 @@
 		public string Name { get; set; }
 		public string Email { get; set; }
 		public string Password { get; set; }
+
+		[NotMapped]
 		public IFormFile? Img { get; set; }
 		public string? ImgPath { get; set; }
 
