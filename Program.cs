@@ -17,6 +17,8 @@ namespace FeedBackBoardApi
             builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
 
+			builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
+
 			builder.Services.AddDbContext<AppDbContext>(options =>
 			  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 
