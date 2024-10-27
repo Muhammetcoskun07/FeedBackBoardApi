@@ -1,5 +1,6 @@
 
 using FeedBackBoardApi.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -26,14 +27,15 @@ namespace FeedBackBoardApi
 
 			var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+			// Configure the HTTP request pipeline.
+			app.UseSwagger();
+			app.UseSwaggerUI(c =>
+			{
+				c.SwaggerEndpoint("/swagger/v1/swagger.json", "Feedback API V1");
+				c.RoutePrefix = string.Empty;
+			});
 
-            app.UseHttpsRedirection();
+			app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
