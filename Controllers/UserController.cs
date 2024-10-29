@@ -87,6 +87,7 @@ namespace FeedBackBoardApi.Controllers
 
             var userInfo = new
             {
+                user.Id,
                 user.FirstName,
                 user.LastName,
                 user.Email,

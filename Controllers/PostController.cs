@@ -105,6 +105,46 @@ namespace FeedBackBoardApi.Controllers
             return Ok(response);
         }
 
+        [HttpPut("Update{id}")]
+        public IActionResult UpdatePost(int id, [FromBody] DtoAddPost postDto) 
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var post = _context.Posts.Find(id);
+            if (post == null)
+            {
+                return NotFound($"Post {id} not found");
+            }
+
+            post.Title = postDto.Title;
+            post.Detail = postDto.Detail;
+            post.CategoryId = postDto.CategoryId;
+            post.Status = postDto.Status;
+
+            _context.Posts.Update(post);
+            _context.SaveChanges();
+
+            return Ok(post);
+        }
+        [HttpDelete("{id}")]
+        public IActionResult DeletePost(int id)
+        {
+            var post = _context.Posts.Find(id);
+            if (post == null)
+            {
+                return NotFound($"Post {id} not found");
+            }
+
+            _context.Posts.Remove(post);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
+
+
 
         [HttpGet("uploads")]
         public IActionResult GetUploads()
