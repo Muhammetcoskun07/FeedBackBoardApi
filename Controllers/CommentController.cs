@@ -19,7 +19,6 @@ namespace FeedBackBoardApi.Controllers
             _context = context;
         }
 
-        // Yeni Yorum Oluşturma
         [HttpPost("create")]
         public async Task<IActionResult> CreateComment([FromBody] DtoAddComment commentDto)
         {
@@ -41,7 +40,6 @@ namespace FeedBackBoardApi.Controllers
             return Ok("Comment created successfully.");
         }
 
-        // Tüm Yorumları Getirme
         [HttpGet("all")]
         public async Task<IActionResult> GetAllComments()
         {
@@ -59,7 +57,6 @@ namespace FeedBackBoardApi.Controllers
             return Ok(comments);
         }
 
-        // Post ID ile Yorumları Getirme
         [HttpGet("post/{postId}")]
         public async Task<IActionResult> GetCommentsByPostId(int postId)
         {
@@ -76,7 +73,6 @@ namespace FeedBackBoardApi.Controllers
             return Ok(comments);
         }
 
-        // Yorum ID ile Tek Yorum Getirme
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCommentById(int id)
         {
@@ -100,7 +96,6 @@ namespace FeedBackBoardApi.Controllers
             return Ok(response);
         }
 
-        // Yorum Güncelleme
         [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateComment(int id, [FromBody] DtoAddComment commentDto)
         {
@@ -116,7 +111,6 @@ namespace FeedBackBoardApi.Controllers
                 return NotFound("Comment not found.");
             }
 
-            // Gelen bilgileri mevcut Comment nesnesine güncelle
             comment.Content = commentDto.CommentName;
             comment.PostId = commentDto.PostId;
 
@@ -125,7 +119,6 @@ namespace FeedBackBoardApi.Controllers
             return Ok("Comment updated successfully.");
         }
 
-        // Yorum Silme
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteComment(int id)
         {

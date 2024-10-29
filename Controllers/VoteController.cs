@@ -19,7 +19,6 @@ namespace FeedBackBoardApi.Controllers
             _context = context;
         }
 
-        // Tüm Oyları Getir
         [HttpGet("all")]
         public async Task<IActionResult> GetAllVotes()
         {
@@ -27,7 +26,6 @@ namespace FeedBackBoardApi.Controllers
             return Ok(votes);
         }
 
-        // Belirli bir ID ile Oy Getir
         [HttpGet("{id}")]
         public async Task<IActionResult> GetVoteById(int id)
         {
@@ -48,43 +46,33 @@ namespace FeedBackBoardApi.Controllers
                 return BadRequest("Vote data is null.");
             }
 
-            try
-            {
-                // Önce aynı kullanıcı ve post için var olan bir Vote kaydını arıyoruz
+           
                 var existingVote = await _context.Votes
                     .FirstOrDefaultAsync(v => v.UserId == voteDto.UserId && v.PostId == voteDto.PostId);
 
                 if (existingVote != null)
                 {
-                    // Eğer kayıt varsa, Count'u artırıyoruz
                     existingVote.Count += 1;
                 }
                 else
                 {
-                    // Eğer kayıt yoksa, yeni bir Vote kaydı oluşturuyoruz
                     var newVote = new Vote
                     {
                         UserId = voteDto.UserId,
-                        ApplicationUser = await _context.Users.FindAsync(voteDto.UserId), // Kullanıcıyı buluyoruz
+                        ApplicationUser = await _context.Users.FindAsync(voteDto.UserId), 
                         PostId = voteDto.PostId,
-                        Count = 1  // Yeni kayıt için Count başlangıç olarak 1
+                        Count = 1  
                     };
 
                     _context.Votes.Add(newVote);
                 }
 
-                // Değişiklikleri kaydediyoruz
                 await _context.SaveChangesAsync();
 
                 return Ok("Vote updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Sunucu hatası: {ex.Message}");
-            }
+           
         }
 
-        // Oyu Güncelle
         [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateVote(int id, [FromBody] Vote updatedVote)
         {
@@ -108,7 +96,6 @@ namespace FeedBackBoardApi.Controllers
             return Ok("Vote updated successfully.");
         }
 
-        // Oyu Sil
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteVote(int id)
         {

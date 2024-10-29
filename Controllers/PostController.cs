@@ -32,28 +32,23 @@ namespace FeedBackBoardApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            try
-            {
+           
                 var post = new Post
                 {
                     Title = postDto.Title,
                     Detail = postDto.Detail,
                     CategoryId = postDto.CategoryId,
-                    Status = postDto.Status // Eğer durumu da gönderiyorsanız
+                    Status = postDto.Status 
                 };
 
                 _context.Posts.Add(post);
                 await _context.SaveChangesAsync();
 
                 return Ok("Post created successfully.");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Sunucu hatası: {ex.Message}");
-            }
+            
+           
         }
 
-        // Tüm Postları Getirme
         [HttpGet("all")]
         public async Task<IActionResult> GetAllPosts()
         {
@@ -76,7 +71,6 @@ namespace FeedBackBoardApi.Controllers
             return Ok(posts);
         }
 
-        // ID ile Post Getirme
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPostById(int id)
         {
@@ -158,7 +152,6 @@ namespace FeedBackBoardApi.Controllers
             return Ok(files);
         }
 
-        // Yüklenen Resmi Silme (Delete Upload)
         [HttpDelete("FotoDelete/{fileName}")]
         public IActionResult DeleteUpload(string fileName)
         {

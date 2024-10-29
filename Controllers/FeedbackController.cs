@@ -1,4 +1,5 @@
 ﻿using FeedBackBoardApi.Data;
+using FeedBackBoardApi.DTOs;
 using FeedBackBoardApi.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -34,7 +35,7 @@ namespace FeedBackBoardApi.Controllers
         /// <param name="id">Feedback ID'si.</param>
         /// <returns>Güncellenen feedback</returns>
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] Feedback model)
+        public IActionResult Update(int id, [FromBody] DtoAddFeedBack model)
         {
             return Ok(id.ToString());
         }
@@ -47,7 +48,7 @@ namespace FeedBackBoardApi.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] FeedbackModel model)
+        public async Task<IActionResult> Create([FromBody] DtoAddFeedBack model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             // var user = await _userManager.FindByIdAsync(userId);
