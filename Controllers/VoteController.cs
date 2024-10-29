@@ -74,27 +74,30 @@ namespace FeedBackBoardApi.Controllers
         }
 
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateVote(int id, [FromBody] Vote updatedVote)
+        public async Task<IActionResult> UpdateVote(int id, [FromBody] DtoAddVote updatedVoteDto)
         {
-            if (updatedVote == null || id != updatedVote.Id)
+            if (updatedVoteDto == null || id <= 0)
             {
                 return BadRequest("Invalid vote data.");
             }
 
+            // Mevcut oyu veritabanından bul
             var vote = await _context.Votes.FindAsync(id);
             if (vote == null)
             {
                 return NotFound("Vote not found.");
             }
 
-            vote.UserId = updatedVote.UserId;
-            vote.PostId = updatedVote.PostId;
-            vote.Count = updatedVote.Count;
+            // Güncellenmiş değerleri mevcut oya ata
+            vote.UserId = updatedVoteDto.UserId;
+            vote.PostId = updatedVoteDto.PostId;
 
+            // Değişiklikleri kaydet
             await _context.SaveChangesAsync();
 
             return Ok("Vote updated successfully.");
         }
+
 
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteVote(int id)
