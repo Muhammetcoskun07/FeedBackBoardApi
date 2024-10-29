@@ -1,143 +1,100 @@
 ﻿using FeedBackBoardApi.Data;
 using FeedBackBoardApi.DTOs;
 using FeedBackBoardApi.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace FeedBackBoardApi.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    [Route("[controller]")]
+    public class AuthController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public UserController(AppDbContext context)
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
-            _context = context;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        // GET: api/User
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<DtoAddUser>>> GetUsers()
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(Register model)
         {
-            var users = await _context.Users
-                .Select(user => new DtoAddUser
-                {
-                    Id = user.Id,
-                    Name = user.Name,
-                    Email = user.Email,
-                    ImgPath = user.ImgPath
-                })
-                .ToListAsync();
-
-            return Ok(users);
-        }
-
-        // GET: api/User/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<DtoAddUser>> GetUser(int id)
-        {
-            var user = await _context.Users
-                .Include(u => u.Votes)
-                .Include(u => u.Comments)
-                .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (user == null)
+            var user = new ApplicationUser
             {
-                return NotFound();
-            }
-
-            var userDto = new DtoAddUser
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                ImgPath = user.ImgPath
+                UserName = model.Email,
+                Email = model.Email,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Avatar = model.Avatar,
+                Nickname = model.Nickname
             };
 
-            return Ok(userDto);
-        }
+            var result = await _userManager.CreateAsync(user, model.Password);
 
-        // POST: api/User
-        [HttpPost]
-        public async Task<ActionResult<DtoAddUser>> CreateUser([FromBody] DtoAddUser newUserDto)
-        {
-            var newUser = new User
+            if (result.Succeeded)
             {
-                Name = newUserDto.Name,
-                Email = newUserDto.Email,
-                Password = newUserDto.Password, 
-                ImgPath = newUserDto.ImgPath
-            };
-
-            _context.Users.Add(newUser);
-            await _context.SaveChangesAsync();
-
-            newUserDto.Id = newUser.Id;
-
-            return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, newUserDto);
-        }
-
-        // PUT: api/User/{id}
-        [HttpPut("Update{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] DtoAddUser updatedUserDto)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
+                await _signInManager.SignInAsync(user, false);
+                return Ok("Kullanıcı kaydedildi.");
+                // persistent kalıcı
             }
 
-            // Güncellenmiş bilgileri ayarla
-            user.Name = updatedUserDto.Name;
-            user.Email = updatedUserDto.Email;
-            user.Password = updatedUserDto.Password; // Şifre hash işlemi eklenmeli
-            user.ImgPath = updatedUserDto.ImgPath;
-
-            _context.Entry(user).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return BadRequest(result.Errors);
         }
 
-        // DELETE: api/User/{id}
-        [HttpDelete("Delete{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
         [HttpPost("login")]
-        public async Task<ActionResult> Login([FromBody] DtoAddUser loginDto)
+        public async Task<IActionResult> Login(Login model)
         {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == loginDto.Email && u.Password == loginDto.Password);
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: false, lockoutOnFailure: false);
+
+            if (result.Succeeded) // süssüz yazımı çirkin - i agree with Miray
+            {
+                return Ok("Giriş yapıldı.");
+            }
+
+            return Unauthorized("Bu kullanıcı bulunamadı.");
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return Ok(new
+            {
+                success = true,
+                msg = "Çıkış yapıldı."
+            });
+        }
+
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
             {
-                return Unauthorized("Invalid email or password.");
+                return NotFound("Kullanıcı girişi yapılmamış.");
             }
 
-            var userDto = new DtoAddUser
+            var userInfo = new
             {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                ImgPath = user.ImgPath
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                user.Avatar,
+                user.Nickname
             };
 
-            return Ok(userDto);
+            return Ok(userInfo);
         }
     }
 }

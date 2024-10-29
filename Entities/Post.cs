@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FeedBackBoardApi.Entities
 {
@@ -9,21 +10,21 @@ namespace FeedBackBoardApi.Entities
 		Live
 	}
 
-	public class Post
-	{
-		[Key]
-		public int Id { get; set; }
-		public string Title { get; set; }
-		public string Detail { get; set; }
-		public int CommentId { get; set; }
-		public int CategoryId { get; set; }
+    public class Post
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Detail { get; set; }
 
-		public Status Status { get; set; }
+        [ForeignKey("Category")]
+        public int CategoryId { get; set; }
+        public Category Category { get; set; }
 
+        public Status Status { get; set; }
 
-		public Category Category { get; set; }
-		public List<Comment> Comments { get; set; }
-		public List<Vote> Votes { get; set; }
+        public List<Comment> Comments { get; set; }
+        public List<Vote> Votes { get; set; }
+    }
 
-	}
 }

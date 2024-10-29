@@ -4,53 +4,60 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FeedBackBoardApi.Data
 {
-	public class AppDbContext : IdentityDbContext<ApplicationUser>
-	{
-		public DbSet<Post> Posts { get; set; }
-		//public DbSet<User> Users { get; set; }
-		public DbSet<Category> Categories { get; set; }
-		public DbSet<Comment> Comments { get; set; }
-		public DbSet<Vote> Votes { get; set; }
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        {
+        }
 
-		public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-		{
-		}
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<ApplicationUser> Users { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<Vote> Votes { get; set; }
 
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
-		{
-			//modelBuilder.Entity<Comment>()
-			//	.HasOne<User>()
-			//	.WithMany()
-			//	.HasForeignKey(c => c.UserId)
-			//	.OnDelete(DeleteBehavior.NoAction);
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
 
-			//modelBuilder.Entity<Post>()
-			//	.HasOne<Category>()
-			//	.WithMany()
-			//	.HasForeignKey(p => p.CategoryId)
-			//	.OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.ApplicationUser)
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			//modelBuilder.Entity<Comment>()
-			//	.HasOne<Post>()
-			//	.WithMany()
-			//	.HasForeignKey(c => c.PostId)
-			//	.OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Feedback>()
+                .HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			//modelBuilder.Entity<Vote>()
-			//	.HasOne(v => v.User)
-			//	.WithMany()
-			//	.HasForeignKey(v => v.UserId)
-			//	.OnDelete(DeleteBehavior.NoAction); 
+            modelBuilder.Entity<Vote>()
+                .HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(v => v.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
 
-			//modelBuilder.Entity<Vote>()
-			//	.HasOne(v => v.Post)
-			//	.WithMany()
-			//	.HasForeignKey(v => v.PostId)
-			//	.OnDelete(DeleteBehavior.NoAction); // Değişiklik
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.Post)
+                .WithMany(p => p.Comments)
+                .HasForeignKey(c => c.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			//modelBuilder.Entity<User>().Ignore(u => u.Img);
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.Category)
+                .WithMany(c => c.Posts)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-			base.OnModelCreating(modelBuilder);
-		}
-	}
+            modelBuilder.Entity<Vote>()
+                .HasOne(v => v.Post)
+                .WithMany(p => p.Votes)
+                .HasForeignKey(v => v.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+        }
+    }
 }

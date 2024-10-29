@@ -1,4 +1,5 @@
 ﻿using FeedBackBoardApi.Data;
+using FeedBackBoardApi.DTOs;
 using FeedBackBoardApi.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,27 +19,48 @@ namespace FeedBackBoardApi.Controllers
         {
             _context = context;
         }
-
         [HttpPost("create")]
-        public async Task<IActionResult> CreatePost([FromBody] Post post)
+        public async Task<IActionResult> CreatePost([FromBody] DtoAddPost postDto)
         {
-            if (post == null)
+            if (postDto == null)
             {
                 return BadRequest("Post data is null.");
             }
 
-            _context.Posts.Add(post);
-            await _context.SaveChangesAsync();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            return Ok("Post created successfully.");
+            try
+            {
+                var post = new Post
+                {
+                    Title = postDto.Title,
+                    Detail = postDto.Detail,
+                    CategoryId = postDto.CategoryId,
+                    Status = postDto.Status // Eğer durumu da gönderiyorsanız
+                };
+
+                _context.Posts.Add(post);
+                await _context.SaveChangesAsync();
+
+                return Ok("Post created successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Sunucu hatası: {ex.Message}");
+            }
         }
 
+        // Tüm Postları Getirme
         [HttpGet("all")]
         public async Task<IActionResult> GetAllPosts()
         {
             var posts = await _context.Posts
                 .Include(p => p.Votes)
                 .Include(p => p.Comments)
+                .Include(p => p.Category)
                 .Select(p => new
                 {
                     PostId = p.Id,
@@ -47,19 +69,21 @@ namespace FeedBackBoardApi.Controllers
                     VoteCount = p.Votes.Sum(v => v.Count),
                     CommentCount = p.Comments.Count,
                     Status = p.Status,
-                    Category = p.Category.CategoryName
+                    Category = p.Category != null ? p.Category.CategoryName : "No Category"
                 })
                 .ToListAsync();
 
             return Ok(posts);
         }
 
+        // ID ile Post Getirme
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPostById(int id)
         {
             var post = await _context.Posts
                 .Include(p => p.Votes)
                 .Include(p => p.Comments)
+                .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (post == null)
@@ -67,10 +91,21 @@ namespace FeedBackBoardApi.Controllers
                 return NotFound("Post not found.");
             }
 
-            return Ok(post);
+            var response = new
+            {
+                PostId = post.Id,
+                Title = post.Title,
+                Detail = post.Detail,
+                VoteCount = post.Votes.Sum(v => v.Count),
+                CommentCount = post.Comments.Count,
+                Status = post.Status,
+                Category = post.Category != null ? post.Category.CategoryName : "No Category"
+            };
+
+            return Ok(response);
         }
 
-     
+
         [HttpGet("uploads")]
         public IActionResult GetUploads()
         {
@@ -84,7 +119,7 @@ namespace FeedBackBoardApi.Controllers
         }
 
         // Yüklenen Resmi Silme (Delete Upload)
-        [HttpDelete("uploads/{fileName}")]
+        [HttpDelete("FotoDelete/{fileName}")]
         public IActionResult DeleteUpload(string fileName)
         {
             var filePath = Path.Combine(_uploadsFolder, fileName);
