@@ -55,7 +55,7 @@ namespace FeedBackBoardApi
             var app = builder.Build();
 
             // HTTP request pipeline yapýlandýrmasý
-            if (app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
