@@ -22,8 +22,21 @@ namespace FeedBackBoardApi.Controllers
             _context = context;
             _userManager = userManager;
         }
+		[HttpGet("categories")]
+		public IActionResult GetCategories()
+		{
+			var categories = _context.Categories
+				.Select(c => new DtoAddCategory
+				{
+					Id = c.Id,
+					CategoryName = c.CategoryName,
+				})
+				.ToList();
 
-        [HttpGet]
+			return Ok(categories);
+		}
+
+		[HttpGet]
         public IActionResult Index()
         {
             return Ok(_context.Feedbacks.ToArray());
